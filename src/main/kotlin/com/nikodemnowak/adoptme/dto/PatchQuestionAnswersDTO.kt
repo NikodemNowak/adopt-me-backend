@@ -3,7 +3,7 @@ package com.nikodemnowak.adoptme.dto
 import java.util.*
 
 data class PatchQuestionAnswersDTO(
-        val id: UUID,
+        val id: String,
         val answer1: String,
         val answer2: String,
         val answer3: String,

@@ -30,7 +30,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:2.5.5")
 
     //database
-    runtimeOnly("com.h2database:h2:1.4.200")
+    implementation("com.h2database:h2:1.4.200")
 
     //testing
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")

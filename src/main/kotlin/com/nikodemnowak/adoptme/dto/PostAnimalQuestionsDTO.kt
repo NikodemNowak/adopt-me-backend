@@ -6,6 +6,6 @@ import javax.validation.constraints.NotEmpty
 data class PostAnimalQuestionsDTO(
         @field:NotEmpty
         val animalType: String,
-        val question: UUID,
+        val question: String,
         val number: Int
 )

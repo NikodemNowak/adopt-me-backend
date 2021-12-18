@@ -6,6 +6,7 @@ import com.nikodemnowak.adoptme.repository.AnimalTypeRepository
 import com.nikodemnowak.adoptme.repository.QuestionAnswersRepository
 import org.springframework.stereotype.Component
 import java.lang.RuntimeException
+import java.util.*
 
 interface AnimalQuestionsMapper {
     fun toEntity(postAnimalQuestionsDTO: PostAnimalQuestionsDTO): AnimalQuestions
@@ -20,7 +21,7 @@ class AnimalQuestionsMapperImpl(
         with(postAnimalQuestionsDTO) {
             val type = animalTypeRepository.findAnimalTypeByAnimalType(animalType)
                     ?: throw RuntimeException("Animal type $animalType not found")
-            val que = questionAnswersRepository.findQuestionAnswersById(question)
+            val que = questionAnswersRepository.findQuestionAnswersById(UUID.fromString(question))
                     ?: throw RuntimeException("Question answers with id $question not found")
             return AnimalQuestions(type, que, number)
         }

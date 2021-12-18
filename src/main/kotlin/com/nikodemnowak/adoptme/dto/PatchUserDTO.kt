@@ -3,7 +3,7 @@ package com.nikodemnowak.adoptme.dto
 import java.util.*
 
 data class PatchUserDTO(
-        val id: UUID,
+        val id: String,
         val firstName: String,
         val lastName: String,
         val phoneNumber: String,

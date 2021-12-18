@@ -10,6 +10,7 @@ import com.nikodemnowak.adoptme.repository.AnimalTypeRepository
 import com.nikodemnowak.adoptme.repository.QuestionAnswersRepository
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
+import java.util.*
 
 interface AnimalQuestionsService {
     fun findAll(animalType: String?): List<AnimalQuestionsDTO>
@@ -44,7 +45,7 @@ class AnimalQuestionsServiceImpl(
                     ?: throw RuntimeException("Animal Questions with id $id not found")
             val type = animalTypeRepository.findAnimalTypeByAnimalType(animalType)
                     ?: throw RuntimeException("Animal type with name $animalType not found")
-            val q = questionAnswersRepository.findQuestionAnswersById(question)
+            val q = questionAnswersRepository.findQuestionAnswersById(UUID.fromString(question))
                     ?: throw RuntimeException("Question answers with id $question not found")
             type.apply { aq.animalType = this }
             q.apply { aq.question = this }

@@ -10,13 +10,14 @@ import java.util.*
 
 interface UserService {
     fun findAll(): List<UserDTO>
-    fun addUser(postUserDTO: PostUserDTO): UUID
+    fun addUser(postUserDTO: PostUserDTO): String
+    fun addUserTest(postUserDTO: PostUserDTO): UserDTO
     fun update(patchUserDTO: PatchUserDTO): UserDTO
-    fun setUserExpired(userId: UUID)
+    fun setUserExpired(userId: String)
     fun sendOtpCode(phoneNumber: String)
     fun generateOtpCode(phoneNumber: String)
     fun verifyOtpCode(postVerifyOtpDTO: PostVerifyOtpDTO): Boolean
-    fun generateNewSession(session: UUID): UUID
+    fun generateNewSession(session: String): String
     fun setPin(postUserPinDTO: PostUserPinDTO): TokenDTO
 }
 
@@ -29,16 +30,22 @@ class UserServiceImpl(
         return userRepository.findAll().toDto()
     }
 
-    override fun addUser(postUserDTO: PostUserDTO): UUID {
+    override fun addUser(postUserDTO: PostUserDTO): String {
         val user = userMapper.toEntity(postUserDTO)
-        user.session = UUID.randomUUID()
+        user.session = UUID.randomUUID().toString()
         userRepository.save(user)
-        return user.session!!
+        return user.session!!.toString()
+    }
+
+    override fun addUserTest(postUserDTO: PostUserDTO): UserDTO {
+        val user = userMapper.toEntity(postUserDTO)
+        userRepository.save(user)
+        return user.toDto()
     }
 
     override fun update(patchUserDTO: PatchUserDTO): UserDTO {
         with(patchUserDTO) {
-            val user = userRepository.findUserById(id) ?: throw RuntimeException("User with id $id not found")
+            val user = userRepository.findUserById(UUID.fromString(id)) ?: throw RuntimeException("User with id $id not found")
             firstName.apply { user.firstName = this }
             lastName.apply { user.lastName = this }
             phoneNumber.apply { user.phoneNumber = this }
@@ -48,8 +55,8 @@ class UserServiceImpl(
         }
     }
 
-    override fun setUserExpired(userId: UUID) {
-        val user = userRepository.findUserById(userId)
+    override fun setUserExpired(userId: String) {
+        val user = userRepository.findUserById(UUID.fromString(userId))
                 ?: throw RuntimeException("User with id $userId not found")
         user.expired = true
         userRepository.save(user)
@@ -64,6 +71,7 @@ class UserServiceImpl(
                 ?: throw RuntimeException("User with phone number $phoneNumber not found")
 //        user.otp = Random.nextInt(from = 1, until = 9999).toString()
         user.otp = "123456"
+        userRepository.save(user)
     }
 
     override fun verifyOtpCode(postVerifyOtpDTO: PostVerifyOtpDTO): Boolean {
@@ -72,10 +80,11 @@ class UserServiceImpl(
         return postVerifyOtpDTO.otpCode == user.otp
     }
 
-    override fun generateNewSession(session: UUID): UUID {
+    override fun generateNewSession(session: String): String {
         val user = userRepository.findUserBySession(session)
                 ?: throw RuntimeException("User with session $session not found")
-        user.session = UUID.randomUUID()
+        user.session = UUID.randomUUID().toString()
+        userRepository.save(user)
         return user.session!!
     }
 

@@ -13,7 +13,7 @@ import java.lang.RuntimeException
 import java.util.*
 
 interface UserPreferencesService {
-    fun findAll(userId: UUID?): List<UserPreferencesDTO>
+    fun findAll(userId: String?): List<UserPreferencesDTO>
     fun save(postUserPreferencesDTO: PostUserPreferencesDTO): UserPreferencesDTO
     fun update(patchUserPreferencesDTO: PatchUserPreferencesDTO): UserPreferencesDTO
 }
@@ -24,9 +24,10 @@ class UserPreferencesServiceImpl(
         private val userRepository: UserRepository,
         private val userPreferencesMapper: UserPreferencesMapper
 ) : UserPreferencesService {
-    override fun findAll(userId: UUID?): List<UserPreferencesDTO> {
+    override fun findAll(userId: String?): List<UserPreferencesDTO> {
         return if (userId != null) {
-            val user = userRepository.findUserById(userId) ?: throw RuntimeException("User with id $userId not found")
+            val user = userRepository.findUserById(UUID.fromString(userId))
+                    ?: throw RuntimeException("User with id $userId not found")
             userPreferencesRepository.findAllByUser(user).toDto()
         } else {
             userPreferencesRepository.findAll().toDto()
@@ -46,7 +47,7 @@ class UserPreferencesServiceImpl(
     }
 }
 
-fun UserPreferences.toDto(): UserPreferencesDTO = UserPreferencesDTO(id.toString(), user.toString(), questionAnswers.toString(), answer)
+fun UserPreferences.toDto(): UserPreferencesDTO = UserPreferencesDTO(user.id.toString(), questionAnswers.id.toString(), answer)
 
 fun List<UserPreferences>.toDto(): List<UserPreferencesDTO> {
     return map { it.toDto() }

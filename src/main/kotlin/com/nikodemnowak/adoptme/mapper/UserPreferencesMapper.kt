@@ -6,6 +6,7 @@ import com.nikodemnowak.adoptme.repository.QuestionAnswersRepository
 import com.nikodemnowak.adoptme.repository.UserRepository
 import org.springframework.stereotype.Component
 import java.lang.RuntimeException
+import java.util.*
 
 interface UserPreferencesMapper {
     fun toEntity(postUserPreferencesDTO: PostUserPreferencesDTO): UserPreferences
@@ -18,8 +19,8 @@ class UserPreferencesMapperImpl(
 ) : UserPreferencesMapper {
     override fun toEntity(postUserPreferencesDTO: PostUserPreferencesDTO): UserPreferences {
         with(postUserPreferencesDTO) {
-            val user1 = userRepository.findUserById(user) ?: throw RuntimeException("User with id $user not found")
-            val questionAnswers1 = questionAnswersRepository.findQuestionAnswersById(questionAnswers) ?: throw RuntimeException("Question answers with id $questionAnswers not found")
+            val user1 = userRepository.findUserById(UUID.fromString(user)) ?: throw RuntimeException("User with id $user not found")
+            val questionAnswers1 = questionAnswersRepository.findQuestionAnswersById(UUID.fromString(questionAnswers)) ?: throw RuntimeException("Question answers with id $questionAnswers not found")
             return UserPreferences(user1, questionAnswers1, answer)
         }
     }

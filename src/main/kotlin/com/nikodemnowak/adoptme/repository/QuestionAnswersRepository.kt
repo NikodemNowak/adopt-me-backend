@@ -7,5 +7,5 @@ import java.util.*
 
 @Repository
 interface QuestionAnswersRepository : JpaRepository<QuestionAnswers, UUID> {
-    fun findQuestionAnswersById(id: UUID): QuestionAnswers?
+    fun findQuestionAnswersById(uuid: UUID): QuestionAnswers?
 }

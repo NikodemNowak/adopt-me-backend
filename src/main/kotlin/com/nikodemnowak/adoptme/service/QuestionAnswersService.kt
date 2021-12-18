@@ -8,6 +8,7 @@ import com.nikodemnowak.adoptme.mapper.QuestionAnswersMapper
 import com.nikodemnowak.adoptme.repository.QuestionAnswersRepository
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
+import java.util.*
 
 interface QuestionAnswersService {
     fun findAll(): List<QuestionAnswersDTO>
@@ -30,7 +31,7 @@ class QuestionAnswersServiceImpl(
 
     override fun update(patchQuestionAnswersDTO: PatchQuestionAnswersDTO): QuestionAnswersDTO {
         with(patchQuestionAnswersDTO) {
-            val qa = questionAnswersRepository.findQuestionAnswersById(id)
+            val qa = questionAnswersRepository.findQuestionAnswersById(UUID.fromString(id))
                     ?: throw RuntimeException("Question answers with id $id not found")
             answer1.apply { qa.answer1 = this }
             answer2.apply { qa.answer2 = this }

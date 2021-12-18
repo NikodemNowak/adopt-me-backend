@@ -8,6 +8,6 @@ import java.util.*
 
 @Repository
 interface AnimalQuestionsRepository : JpaRepository<AnimalQuestions, UUID> {
-    fun findAnimalQuestionsById(id: UUID): AnimalQuestions?
+    fun findAnimalQuestionsById(id: String): AnimalQuestions?
     fun findAllByAnimalType(animalType: AnimalType): List<AnimalQuestions>
 }

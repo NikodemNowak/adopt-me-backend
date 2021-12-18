@@ -23,13 +23,18 @@ class UserController(
         return ok(userService.findAll())
     }
 
+    @PostMapping
+    fun addUser(@Valid @RequestBody postUserDTO: PostUserDTO): ResponseEntity<UserDTO> {
+        return ResponseEntity(userService.addUserTest(postUserDTO), HttpStatus.CREATED)
+    }
+
     @PatchMapping
     fun editUser(patchUserDTO: PatchUserDTO): ResponseEntity<UserDTO> {
         return ResponseEntity(userService.update(patchUserDTO), HttpStatus.CREATED)
     }
 
     @DeleteMapping("/{userId}")
-    fun deleteUser(@PathVariable userId: UUID): ResponseEntity<ApiMessage> {
+    fun deleteUser(@PathVariable userId: String): ResponseEntity<ApiMessage> {
         userService.setUserExpired(userId)
         return ok(ApiMessage("User removed"))
     }

@@ -18,19 +18,19 @@ class RegisterController(
 ) {
     @PostMapping("/addUser")
     fun addUser(@Valid @RequestBody postUserDTO: PostUserDTO): ResponseEntity<String> {
-//        val session = userService.addUser(postUserDTO)
-//        userService.generateOtpCode(postUserDTO.phoneNumber)
-//        userService.sendOtpCode(postUserDTO.phoneNumber)
-//        return ResponseEntity(session.toString(), HttpStatus.OK)
-        return ResponseEntity("OK", HttpStatus.OK)
+        val session = userService.addUser(postUserDTO)
+        userService.generateOtpCode(postUserDTO.phoneNumber)
+        userService.sendOtpCode(postUserDTO.phoneNumber)
+        return ResponseEntity(session, HttpStatus.OK)
+//        return ResponseEntity("OK", HttpStatus.OK)
     }
 
     @PostMapping("/verifyOtp")
-    fun verifyOtp(@Valid @RequestBody postVerifyOtpDTO: PostVerifyOtpDTO): ResponseEntity<UUID> {
+    fun verifyOtp(@Valid @RequestBody postVerifyOtpDTO: PostVerifyOtpDTO): ResponseEntity<String> {
         return if (userService.verifyOtpCode(postVerifyOtpDTO)) {
             ResponseEntity(userService.generateNewSession(postVerifyOtpDTO.session), HttpStatus.OK)
         } else {
-            ResponseEntity(HttpStatus.BAD_REQUEST)
+            ResponseEntity("Otp invalid", HttpStatus.BAD_REQUEST)
         }
     }
 
