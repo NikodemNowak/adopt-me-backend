@@ -1,7 +1,10 @@
 package com.nikodemnowak.adoptme.entity
 
+import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 
 @Entity
 data class User(
@@ -17,7 +20,15 @@ data class User(
         var city: String,
         var pin: String? = null,
         var session: String? = null,
+
+        // TODO: Dodac date waznosci kodu otp (30 sek)
+
+        var otpSendDate: Date? = null,
         var otp: String? = null,
         var accessToken: String? = null,
-        var refreshToken: String? = null
+        var refreshToken: String? = null,
+
+        @Enumerated(EnumType.STRING)
+        var nextOnboardingStep: NextOnboardingStep = NextOnboardingStep.FILL_FORM
+
 ) : AbstractEntity()

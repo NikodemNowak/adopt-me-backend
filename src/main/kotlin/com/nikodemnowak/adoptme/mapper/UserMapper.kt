@@ -1,6 +1,7 @@
 package com.nikodemnowak.adoptme.mapper
 
 import com.nikodemnowak.adoptme.dto.PostUserDTO
+import com.nikodemnowak.adoptme.entity.NextOnboardingStep
 import com.nikodemnowak.adoptme.entity.User
 import org.springframework.stereotype.Component
 

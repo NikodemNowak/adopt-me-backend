@@ -40,8 +40,11 @@ dependencies {
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 
     //swagger
-    implementation("io.springfox:springfox-boot-starter:3.0.0")
-    implementation("io.springfox:springfox-swagger-ui:3.0.0")
+//    implementation("io.springfox:springfox-boot-starter:3.0.0")
+//    implementation("io.springfox:springfox-swagger-ui:3.0.0")
+
+    //hibernate
+    implementation("org.hibernate:hibernate-core:5.6.3.Final")
 }
 
 tasks.withType<KotlinCompile> {

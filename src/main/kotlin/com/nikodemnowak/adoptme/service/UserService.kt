@@ -1,40 +1,58 @@
 package com.nikodemnowak.adoptme.service
 
+import com.nikodemnowak.adoptme.ApiException
 import com.nikodemnowak.adoptme.dto.*
+import com.nikodemnowak.adoptme.entity.NextOnboardingStep
 import com.nikodemnowak.adoptme.entity.User
 import com.nikodemnowak.adoptme.mapper.UserMapper
 import com.nikodemnowak.adoptme.repository.UserRepository
 import org.springframework.stereotype.Service
-import java.lang.RuntimeException
 import java.util.*
+import kotlin.RuntimeException
 
 interface UserService {
     fun findAll(): List<UserDTO>
-    fun addUser(postUserDTO: PostUserDTO): String
+    fun addUser(postUserDTO: PostUserDTO): SessionDTO
     fun addUserTest(postUserDTO: PostUserDTO): UserDTO
     fun update(patchUserDTO: PatchUserDTO): UserDTO
     fun setUserExpired(userId: String)
     fun sendOtpCode(phoneNumber: String)
-    fun generateOtpCode(phoneNumber: String)
+    fun generateOtpCode(phoneNumber: String): Date
     fun verifyOtpCode(postVerifyOtpDTO: PostVerifyOtpDTO): Boolean
     fun generateNewSession(session: String): String
     fun setPin(postUserPinDTO: PostUserPinDTO): TokenDTO
+    fun deleteBySession(session: String)
+    fun getNextOnboardingStep(session: String): NextOnboardingStep
 }
 
 @Service
 class UserServiceImpl(
-        private val userRepository: UserRepository,
-        private val userMapper: UserMapper
+    private val userRepository: UserRepository,
+    private val userMapper: UserMapper
 ) : UserService {
     override fun findAll(): List<UserDTO> {
         return userRepository.findAll().toDto()
     }
 
-    override fun addUser(postUserDTO: PostUserDTO): String {
+    override fun addUser(postUserDTO: PostUserDTO): SessionDTO {
+        if (userRepository.existsByEmail(postUserDTO.email)) {
+            throw ApiException(
+                message = "User with this email already exists",
+                errorCode = ApiException.EMAIL_TAKEN_ERROR_CODE
+            )
+        }
+        if (userRepository.existsByPhoneNumber(postUserDTO.phoneNumber)) {
+            throw ApiException(
+                message = "User with this phone number already exists",
+                errorCode = ApiException.PHONE_TAKEN_ERROR_CODE
+            )
+        }
+
         val user = userMapper.toEntity(postUserDTO)
         user.session = UUID.randomUUID().toString()
+        user.nextOnboardingStep = NextOnboardingStep.OTP
         userRepository.save(user)
-        return user.session!!.toString()
+        return SessionDTO(user.session!!.toString())
     }
 
     override fun addUserTest(postUserDTO: PostUserDTO): UserDTO {
@@ -45,7 +63,8 @@ class UserServiceImpl(
 
     override fun update(patchUserDTO: PatchUserDTO): UserDTO {
         with(patchUserDTO) {
-            val user = userRepository.findUserById(UUID.fromString(id)) ?: throw RuntimeException("User with id $id not found")
+            val user =
+                userRepository.findUserById(UUID.fromString(id)) ?: throw RuntimeException("User with id $id not found")
             firstName.apply { user.firstName = this }
             lastName.apply { user.lastName = this }
             phoneNumber.apply { user.phoneNumber = this }
@@ -57,7 +76,7 @@ class UserServiceImpl(
 
     override fun setUserExpired(userId: String) {
         val user = userRepository.findUserById(UUID.fromString(userId))
-                ?: throw RuntimeException("User with id $userId not found")
+            ?: throw RuntimeException("User with id $userId not found")
         user.expired = true
         userRepository.save(user)
     }
@@ -66,23 +85,33 @@ class UserServiceImpl(
 
     }
 
-    override fun generateOtpCode(phoneNumber: String) {
+    override fun generateOtpCode(phoneNumber: String): Date {
         val user = userRepository.findUserByPhoneNumber(phoneNumber)
-                ?: throw RuntimeException("User with phone number $phoneNumber not found")
-//        user.otp = Random.nextInt(from = 1, until = 9999).toString()
-        user.otp = "123456"
+            ?: throw RuntimeException("User with phone number $phoneNumber not found")
+        user.otp = buildString {
+            for (i in 0 until 6) {
+                append(kotlin.random.Random.nextInt(10))
+            }
+        }
+        user.otpSendDate = Date()
         userRepository.save(user)
+        return user.otpSendDate!!
     }
 
     override fun verifyOtpCode(postVerifyOtpDTO: PostVerifyOtpDTO): Boolean {
         val user = userRepository.findUserBySession(postVerifyOtpDTO.session)
-                ?: throw RuntimeException("User with session ${postVerifyOtpDTO.session} not found")
-        return postVerifyOtpDTO.otpCode == user.otp
+            ?: throw RuntimeException("User with session ${postVerifyOtpDTO.session} not found")
+        return (postVerifyOtpDTO.otpCode == user.otp).also { isValid ->
+            if (isValid) {
+                user.nextOnboardingStep = NextOnboardingStep.PIN
+                userRepository.save(user)
+            }
+        }
     }
 
     override fun generateNewSession(session: String): String {
         val user = userRepository.findUserBySession(session)
-                ?: throw RuntimeException("User with session $session not found")
+            ?: throw RuntimeException("User with session $session not found")
         user.session = UUID.randomUUID().toString()
         userRepository.save(user)
         return user.session!!
@@ -90,11 +119,21 @@ class UserServiceImpl(
 
     override fun setPin(postUserPinDTO: PostUserPinDTO): TokenDTO {
         val user = userRepository.findUserBySession(postUserPinDTO.session)
-                ?: throw RuntimeException("User with session ${postUserPinDTO.session} not found")
-        if (postUserPinDTO.pin.length == 4) user.pin = postUserPinDTO.pin else throw RuntimeException("Pin length should be 4")
+            ?: throw RuntimeException("User with session ${postUserPinDTO.session} not found")
+        if (postUserPinDTO.pin.length == 4) user.pin =
+            postUserPinDTO.pin else throw RuntimeException("Pin length should be 4")
         user.refreshToken = UUID.randomUUID().toString()
         user.accessToken = UUID.randomUUID().toString()
         return TokenDTO(user.accessToken!!, user.refreshToken!!)
+    }
+
+    override fun deleteBySession(session: String) {
+        userRepository.deleteBySession(session)
+    }
+
+    override fun getNextOnboardingStep(session: String): NextOnboardingStep {
+        val user = userRepository.findUserBySession(session) ?: throw RuntimeException("No user found")
+        return user.nextOnboardingStep
     }
 }
 

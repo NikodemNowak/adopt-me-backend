@@ -38,4 +38,10 @@ class UserController(
         userService.setUserExpired(userId)
         return ok(ApiMessage("User removed"))
     }
+
+    @DeleteMapping("/{session}")
+    fun deleteUserBySession(@PathVariable session: String): ResponseEntity<ApiMessage> {
+        userService.deleteBySession(session)
+        return ok(ApiMessage("User removed"))
+    }
 }
