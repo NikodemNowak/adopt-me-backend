@@ -19,5 +19,7 @@ data class Animal(
     @JoinColumn(nullable = true)
     var shelter: Shelter?,
     var age: Int,
-    var name: String?
+    var name: String?,
+    var photo: String?,
+    var description: String?
 ) : AbstractEntity()

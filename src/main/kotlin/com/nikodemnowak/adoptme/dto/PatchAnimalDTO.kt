@@ -10,5 +10,7 @@ data class PatchAnimalDTO(
         val privateOwner: UUID?,
         val shelter: UUID?,
         val age: Int,
-        val name: String?
+        val name: String?,
+        val photo: String?,
+        val description: String?
 )

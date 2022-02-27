@@ -12,5 +12,7 @@ data class PostAnimalDTO(
 
     val privateOwner: UUID?,
     val shelter: UUID?,
-    val name: String?
+    val name: String?,
+    val photo: String?,
+    val description: String?
 )

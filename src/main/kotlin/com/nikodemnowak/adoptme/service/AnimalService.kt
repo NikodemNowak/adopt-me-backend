@@ -19,18 +19,18 @@ interface AnimalService {
 
 @Service
 class AnimalServiceImpl(
-        private val animalRepository: AnimalRepository,
-        private val animalTypeRepository: AnimalTypeRepository,
-        private val raceRepository: RaceRepository,
-        private val colorRepository: ColorRepository,
-        private val privateOwnerRepository: PrivateOwnerRepository,
-        private val shelterRepository: ShelterRepository,
-        private val animalMapper: AnimalMapper
+    private val animalRepository: AnimalRepository,
+    private val animalTypeRepository: AnimalTypeRepository,
+    private val raceRepository: RaceRepository,
+    private val colorRepository: ColorRepository,
+    private val privateOwnerRepository: PrivateOwnerRepository,
+    private val shelterRepository: ShelterRepository,
+    private val animalMapper: AnimalMapper
 ) : AnimalService {
     override fun findAll(animalType: String?): List<AnimalDTO>? {
         return if (animalType != null) {
             val type = animalTypeRepository.findAnimalTypeByAnimalType(animalType)
-                    ?: throw RuntimeException("Animal type with name $animalType not found")
+                ?: throw RuntimeException("Animal type with name $animalType not found")
             animalRepository.findAllByAnimalTypeAndExpiredIsFalse(type)?.toDto()
         } else {
             animalRepository.findALlByExpiredIsFalse().toDto()
@@ -44,16 +44,16 @@ class AnimalServiceImpl(
     override fun update(patchAnimalDTO: PatchAnimalDTO): AnimalDTO {
         with(patchAnimalDTO) {
             val animal = animalRepository.findAnimalByIdAndExpiredIsFalse(id)
-                    ?: throw RuntimeException("Animal with id $id not found")
+                ?: throw RuntimeException("Animal with id $id not found")
             val type = animalTypeRepository.findAnimalTypeByAnimalType(animalType)
-                    ?: throw RuntimeException("Animal type with name $animalType not found")
+                ?: throw RuntimeException("Animal type with name $animalType not found")
             val r = raceRepository.findRaceByRaceName(race) ?: throw RuntimeException("Race $race not found")
             val c = colorRepository.findColorByColorName(color)
-                    ?: throw RuntimeException("Color with name $color not found")
+                ?: throw RuntimeException("Color with name $color not found")
             val owner = privateOwnerRepository.findPrivateOwnerByIdAndExpiredIsFalse(privateOwner)
-                    ?: throw RuntimeException("Private owner with id $privateOwner not found")
+                ?: throw RuntimeException("Private owner with id $privateOwner not found")
             val s = shelterRepository.findShelterByIdAndExpiredIsFalse(shelter)
-                    ?: throw RuntimeException("Shelter with id $shelter not found")
+                ?: throw RuntimeException("Shelter with id $shelter not found")
             type.apply { animal.animalType = this }
             r.apply { animal.race = this }
             c.apply { animal.color = this }
@@ -65,21 +65,23 @@ class AnimalServiceImpl(
 
     override fun setAnimalExpired(animalId: UUID) {
         val animal = animalRepository.findAnimalByIdAndExpiredIsFalse(animalId)
-                ?: throw RuntimeException("Animal with id $animalId not found")
+            ?: throw RuntimeException("Animal with id $animalId not found")
         animal.expired = true
         animalRepository.save(animal)
     }
 }
 
 fun Animal.toDto(): AnimalDTO = AnimalDTO(
-        id!!,
-        animalType.toString(),
-        race.toString(),
-        color.toString(),
-        shelter?.id,
-        privateOwner?.id,
-        age,
-        name
+    id!!,
+    animalType.animalType,
+    race.raceName,
+    color.colorName,
+    shelter?.id,
+    privateOwner?.id,
+    age,
+    name,
+    photo,
+    description
 )
 
 fun List<Animal>.toDto(): List<AnimalDTO> {

@@ -10,5 +10,7 @@ data class AnimalDTO(
     val shelter: UUID?,
     val privateOwner: UUID?,
     val age: Int,
-    val name: String?
+    val name: String?,
+    val photo: String?,
+    val description: String?
 )

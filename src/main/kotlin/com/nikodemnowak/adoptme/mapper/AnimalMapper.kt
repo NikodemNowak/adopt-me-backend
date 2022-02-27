@@ -29,7 +29,7 @@ class AnimalMapperImpl(
                     ?: throw RuntimeException("Private owner with id $privateOwner not found")
             val shelter1: Shelter = shelterRepository.findShelterByIdAndExpiredIsFalse(shelter)
                     ?: throw RuntimeException("Shelter with id $shelter not found")
-            return Animal(type, race1, color1, owner, shelter1, age, name)
+            return Animal(type, race1, color1, owner, shelter1, age, name, photo, description)
         }
     }
 }
