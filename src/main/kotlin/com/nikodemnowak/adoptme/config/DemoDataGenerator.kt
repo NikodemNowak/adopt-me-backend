@@ -66,7 +66,9 @@ class DemoDataGenerator(
         val orange = colorRepository.save(Color("Orange"))
         val privateOwner1 = privateOwnerRepository.save(PrivateOwner("name", "lastname", "+48321321321", "b@b.com","Warsaw"))
         val shelter1 = shelterRepository.save(Shelter("shelter1", "street 1", "Warsaw", "+48123321123", "8-16"))
-        animalRepository.save(Animal(dog, labrador, white, privateOwner1, null, 1, "Scrappy", "https://www.ardeaprints.com/p/172/dog-yellow-labrador-puppy-peaking-edge-8706167.jpg.webp", "Some interesting description"))
-        animalRepository.save(Animal(cat, bengal, black, null, shelter1, 3, "Kitty", "https://i.pinimg.com/originals/d3/c8/c5/d3c8c5b59e4ca2bc26efd39c911e4625.jpg", "Some interesting description"))
+        for (i in 0 until 100) {
+            animalRepository.save(Animal(dog, labrador, white, privateOwner1, null, 1, "Scrappy", "https://www.ardeaprints.com/p/172/dog-yellow-labrador-puppy-peaking-edge-8706167.jpg", "Some interesting description"))
+            animalRepository.save(Animal(cat, bengal, black, null, shelter1, 3, "Kitty", "https://images.pexels.com/photos/774731/pexels-photo-774731.jpeg", "Some interesting description"))
+        }
     }
 }

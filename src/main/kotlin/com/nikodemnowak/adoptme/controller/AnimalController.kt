@@ -5,6 +5,8 @@ import com.nikodemnowak.adoptme.dto.AnimalDTO
 import com.nikodemnowak.adoptme.dto.PatchAnimalDTO
 import com.nikodemnowak.adoptme.dto.PostAnimalDTO
 import com.nikodemnowak.adoptme.service.AnimalService
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.*
@@ -16,12 +18,15 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/api/animals")
 class AnimalController(
-        private val animalService: AnimalService
+    private val animalService: AnimalService
 ) {
 
     @GetMapping
-    fun getAnimals(@RequestParam(required = false) animalType: String?): ResponseEntity<List<AnimalDTO>> {
-        return ok(animalService.findAll(animalType))
+    fun getAnimals(
+        @RequestParam(required = false) animalType: String?,
+        @PageableDefault(page = 0, size = 20) pageable: Pageable
+    ): ResponseEntity<List<AnimalDTO>> {
+        return ok(animalService.findAll(animalType, pageable))
     }
 
     @PostMapping

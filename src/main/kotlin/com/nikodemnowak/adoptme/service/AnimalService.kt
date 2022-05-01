@@ -6,12 +6,13 @@ import com.nikodemnowak.adoptme.dto.PostAnimalDTO
 import com.nikodemnowak.adoptme.entity.Animal
 import com.nikodemnowak.adoptme.mapper.AnimalMapper
 import com.nikodemnowak.adoptme.repository.*
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
 import java.util.*
 
 interface AnimalService {
-    fun findAll(animalType: String?): List<AnimalDTO>?
+    fun findAll(animalType: String?, pageable: Pageable): List<AnimalDTO>?
     fun save(postAnimalDTO: PostAnimalDTO): AnimalDTO
     fun update(patchAnimalDTO: PatchAnimalDTO): AnimalDTO
     fun setAnimalExpired(animalId: UUID)
@@ -27,13 +28,13 @@ class AnimalServiceImpl(
     private val shelterRepository: ShelterRepository,
     private val animalMapper: AnimalMapper
 ) : AnimalService {
-    override fun findAll(animalType: String?): List<AnimalDTO>? {
+    override fun findAll(animalType: String?, pageable: Pageable): List<AnimalDTO>? {
         return if (animalType != null) {
             val type = animalTypeRepository.findAnimalTypeByAnimalType(animalType)
                 ?: throw RuntimeException("Animal type with name $animalType not found")
-            animalRepository.findAllByAnimalTypeAndExpiredIsFalse(type)?.toDto()
+            animalRepository.findAllByAnimalTypeAndExpiredIsFalse(type, pageable)?.content?.toDto()
         } else {
-            animalRepository.findALlByExpiredIsFalse().toDto()
+            animalRepository.findALlByExpiredIsFalse(pageable).content.toDto()
         }
     }
 

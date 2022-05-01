@@ -12,6 +12,8 @@ import kotlin.RuntimeException
 
 interface UserService {
     fun findAll(): List<UserDTO>
+    fun findByAccessToken(accessToken: String): UserDTO
+    fun loginUser(phoneNumber: String): SessionDTO
     fun addUser(postUserDTO: PostUserDTO): SessionDTO
     fun addUserTest(postUserDTO: PostUserDTO): UserDTO
     fun update(patchUserDTO: PatchUserDTO): UserDTO
@@ -21,6 +23,7 @@ interface UserService {
     fun verifyOtpCode(postVerifyOtpDTO: PostVerifyOtpDTO): Boolean
     fun generateNewSession(session: String): String
     fun setPin(postUserPinDTO: PostUserPinDTO): TokenDTO
+    fun verifyPin(postUserVerifyPinDTO: PostVerifyPinDTO): TokenDTO
     fun deleteBySession(session: String)
     fun getNextOnboardingStep(session: String): NextOnboardingStep
 }
@@ -32,6 +35,18 @@ class UserServiceImpl(
 ) : UserService {
     override fun findAll(): List<UserDTO> {
         return userRepository.findAll().toDto()
+    }
+
+    override fun findByAccessToken(accessToken: String): UserDTO {
+        return userRepository.findUserByAccessToken(accessToken)?.toDto()
+            ?: throw RuntimeException("User with access token $accessToken not found")
+    }
+
+    override fun loginUser(phoneNumber: String): SessionDTO {
+        val user = userRepository.findUserByPhoneNumber(phoneNumber) ?: throw RuntimeException("User with phone number $phoneNumber not found")
+        user.session = UUID.randomUUID().toString()
+        userRepository.save(user)
+        return SessionDTO(user.session!!.toString())
     }
 
     override fun addUser(postUserDTO: PostUserDTO): SessionDTO {
@@ -122,6 +137,16 @@ class UserServiceImpl(
             ?: throw RuntimeException("User with session ${postUserPinDTO.session} not found")
         if (postUserPinDTO.pin.length == 4) user.pin =
             postUserPinDTO.pin else throw RuntimeException("Pin length should be 4")
+        user.refreshToken = UUID.randomUUID().toString()
+        user.accessToken = UUID.randomUUID().toString()
+        return TokenDTO(user.accessToken!!, user.refreshToken!!)
+    }
+
+    override fun verifyPin(postUserVerifyPinDTO: PostVerifyPinDTO): TokenDTO {
+        val user = userRepository.findUserBySession(postUserVerifyPinDTO.session)
+            ?: throw RuntimeException("User with session ${postUserVerifyPinDTO.session} not found")
+        if (postUserVerifyPinDTO.pin.length == 4) user.pin =
+            postUserVerifyPinDTO.pin else throw RuntimeException("Pin length should be 4")
         user.refreshToken = UUID.randomUUID().toString()
         user.accessToken = UUID.randomUUID().toString()
         return TokenDTO(user.accessToken!!, user.refreshToken!!)
