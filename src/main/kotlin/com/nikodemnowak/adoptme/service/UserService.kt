@@ -43,7 +43,8 @@ class UserServiceImpl(
     }
 
     override fun loginUser(phoneNumber: String): SessionDTO {
-        val user = userRepository.findUserByPhoneNumber(phoneNumber) ?: throw RuntimeException("User with phone number $phoneNumber not found")
+        val user = userRepository.findUserByPhoneNumber(phoneNumber)
+            ?: throw RuntimeException("User with phone number $phoneNumber not found")
         user.session = UUID.randomUUID().toString()
         userRepository.save(user)
         return SessionDTO(user.session!!.toString())
@@ -135,20 +136,33 @@ class UserServiceImpl(
     override fun setPin(postUserPinDTO: PostUserPinDTO): TokenDTO {
         val user = userRepository.findUserBySession(postUserPinDTO.session)
             ?: throw RuntimeException("User with session ${postUserPinDTO.session} not found")
-        if (postUserPinDTO.pin.length == 4) user.pin =
-            postUserPinDTO.pin else throw RuntimeException("Pin length should be 4")
+//        user.session = UUID.randomUUID().toString()
+
+        if (postUserPinDTO.pin.length != 4) {
+            throw RuntimeException("Pin length should be 4")
+        }
+
+        user.pin = postUserPinDTO.pin
         user.refreshToken = UUID.randomUUID().toString()
         user.accessToken = UUID.randomUUID().toString()
+        userRepository.save(user)
+
         return TokenDTO(user.accessToken!!, user.refreshToken!!)
     }
 
     override fun verifyPin(postUserVerifyPinDTO: PostVerifyPinDTO): TokenDTO {
         val user = userRepository.findUserBySession(postUserVerifyPinDTO.session)
             ?: throw RuntimeException("User with session ${postUserVerifyPinDTO.session} not found")
-        if (postUserVerifyPinDTO.pin.length == 4) user.pin =
-            postUserVerifyPinDTO.pin else throw RuntimeException("Pin length should be 4")
+//        user.session = UUID.randomUUID().toString()
+
+        if (postUserVerifyPinDTO.pin != user.pin) {
+            throw RuntimeException("Invalid pin")
+        }
+
         user.refreshToken = UUID.randomUUID().toString()
         user.accessToken = UUID.randomUUID().toString()
+        userRepository.save(user)
+
         return TokenDTO(user.accessToken!!, user.refreshToken!!)
     }
 
@@ -162,7 +176,7 @@ class UserServiceImpl(
     }
 }
 
-fun User.toDto() = UserDTO(id, firstName, lastName, phoneNumber, email, city)
+fun User.toDto() = UserDTO(id, firstName, lastName, phoneNumber, email, city, profilePicture)
 fun List<User>.toDto(): List<UserDTO> {
     return map { it.toDto() }
 }

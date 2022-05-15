@@ -20,7 +20,7 @@ class UserController(
 ) {
     @GetMapping("/api/user")
     fun getUser(
-        @RequestParam accessToken: String
+        @RequestParam(name = "accessToken") accessToken: String
     ): ResponseEntity<UserDTO> {
         return ok(userService.findByAccessToken(accessToken))
     }
